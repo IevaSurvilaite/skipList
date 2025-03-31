@@ -7,8 +7,6 @@
 
 namespace SkipListNS {
 
-//Node::Node(int key, int level) : key(key), forward(level+1, nullptr){}
-
 class SkipList::SkipListImpl
 {
 private:
@@ -23,6 +21,7 @@ private:
     float P;
     int level;
     Node* header;
+
 public:
     SkipListImpl(int MAXLVL, float P) : MAXLVL(MAXLVL), P(P), level(0), header(new Node(-1, MAXLVL)) {}
     ~SkipListImpl()
