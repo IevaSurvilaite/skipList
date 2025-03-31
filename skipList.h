@@ -8,29 +8,15 @@ A skip list is a linked-list probabilistic data structure, which has features of
 #ifndef SKIPLIST_H
 #define SKIPLIST_H
 
+#include <memory>
 #include <iostream>
 #include <vector>
 #include <stdexcept>
 
 namespace SkipListNS {
 
-class Node
-{
-public:
-    int key;
-
-    std::vector<Node*> forward;
-    Node(int key, int level);
-};
-
 class SkipList
 {
-    int MAXLVL; //max level for  skip list
-    float P; // nodes dalis lygyje
-    int level; //current lygis
-    Node *header;
-    void clear();
-
 public:
     SkipList(int maxLevel, float probability);
     ~SkipList();
@@ -48,7 +34,9 @@ public:
     bool operator<(const SkipList& other) const;
     bool operator>(const SkipList& other) const;
     void operator!();
-
+private:
+    class SkipListImpl;
+    SkipListImpl* pimpl;
 };
 
 class SkipListException : public std::runtime_error {
