@@ -13,8 +13,11 @@ private:
     struct Node
     {
         int key;
-        std::vector<Node*> forward;
-        Node(int key, int level) : key(key), forward(level+1, nullptr) {}
+        std::vector<Node*> forward; //points to next node
+        Node(int key, int level) : key(key), forward(level+1, nullptr)
+        {
+
+        }
     };
 
     int MAXLVL;
@@ -22,14 +25,22 @@ private:
     int level;
     Node* header;
 
-public:
-    SkipListImpl(int MAXLVL, float P) : MAXLVL(MAXLVL), P(P), level(0), header(new Node(-1, MAXLVL)) {}
+    friend class SkipList;
+
+    //constructor
+    SkipListImpl(int MAXLVL, float P) : MAXLVL(MAXLVL), P(P), level(0), header(new Node(-1, MAXLVL))
+    {
+
+    }
+
+    //destructor
     ~SkipListImpl()
     {
         clear();
         delete header;
     }
 
+    //methods
     void insertElement(int key)
     {
         Node* current = header;
@@ -114,7 +125,7 @@ public:
             }
         }
         current = current->forward[0];
-        if(current && current->key == key)
+        if(current && current->forward[0]->key == key)
         {
             return key;
         }
@@ -149,39 +160,6 @@ public:
         level = 0;
     }
 
-    SkipListImpl(const SkipListImpl& other)
-    {
-        MAXLVL = other.MAXLVL;
-        P = other.P;
-        level = other.level;
-        header = new Node(-1, MAXLVL);
-
-        Node* current = other.header->forward[0];
-        while(current)
-        {
-            insertElement(current->key);
-            current = current->forward[0];
-        }
-    }
-
-    SkipListImpl& operator=(const SkipListImpl& other)
-    {
-        if(this == &other) return *this;
-
-        clear();
-        MAXLVL = other.MAXLVL;
-        P = other.P;
-        level = other.level;
-
-        Node* current = other.header->forward[0];
-        while(current)
-        {
-            insertElement(current->key);
-            current = current->forward[0];
-        }
-        return *this;
-    }
-
     int getElementAt(int index) const
     {
         Node* current = header->forward[0];
@@ -198,38 +176,77 @@ public:
         throw SkipListException("Index out of range");
     }
 
-    int getLevel() const { return level;}
+    int getLevel() const
+    {
+        return level;
+    }
 
+    //for cloning, used in lines 207 and 217
+    void copyFrom(const SkipListImpl& other)
+    {
+        clear();
+        Node* current = other.header->forward[0];
+        while(current)
+        {
+            insertElement(current->key);
+            current = current->forward[0];
+        }
+    }
 };
 
-SkipList::SkipList(int MAXLVL, float P) : pimpl(new SkipListImpl(MAXLVL, P)) {}
-
-SkipList::SkipList(const SkipList& other)
+//constructor
+SkipList::SkipList(int MAXLVL, float P) : pimpl(new SkipListImpl(MAXLVL, P))
 {
-    pimpl = new SkipListImpl(*other.pimpl);
+
 }
 
+//for cloning
+SkipList::SkipList(const SkipList& other)
+{
+    pimpl = new SkipListImpl(other.pimpl->MAXLVL, other.pimpl->P);
+    pimpl->copyFrom(*other.pimpl);
+}
+
+//for cloning
 SkipList& SkipList::operator=(const SkipList& other)
 {
     if(this != &other)
     {
-        *pimpl = *other.pimpl;
+        delete pimpl;
+        pimpl = new SkipListImpl(other.pimpl->MAXLVL, other.pimpl->P);
+        pimpl->copyFrom(*other.pimpl);
     }
     return *this;
 }
 
-SkipList::~SkipList() { delete pimpl;}
-
-void SkipList::insertElement(int key) { pimpl->insertElement(key);}
-void SkipList::removeElement(int key) { pimpl->removeElement(key);}
-int SkipList::search(int key) const { return pimpl->search(key);}
-void SkipList::displayList(std::ostream& os) const {pimpl->displayList(os);}
-
-void SkipList::operator!()
+//destructor
+SkipList::~SkipList()
 {
-    pimpl->clear();
+    delete pimpl;
 }
 
+//methods
+void SkipList::insertElement(int key)
+{
+    pimpl->insertElement(key);
+}
+
+void SkipList::removeElement(int key)
+{
+    pimpl->removeElement(key);
+}
+
+int SkipList::search(int key) const
+{
+    return pimpl->search(key);
+}
+
+void SkipList::displayList(std::ostream& os) const
+{
+    pimpl->displayList(os);
+}
+
+//operators
 SkipList& SkipList::operator+=(int key)
 {
     insertElement(key);
@@ -257,4 +274,16 @@ bool SkipList::operator>(const SkipList& other) const
     return pimpl->getLevel() > other.pimpl->getLevel();
 }
 
+void SkipList::operator!()
+{
+    pimpl->clear();
 }
+//end of skipList methods and operators
+
+//exception
+SkipListException::SkipListException(const std::string& msg) : std::runtime_error(msg)
+{
+
+}
+
+} //end of namespace

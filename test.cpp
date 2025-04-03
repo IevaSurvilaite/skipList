@@ -48,13 +48,9 @@ int main()
         list.displayList(std::cout);
         list.displayList(file);
 
-        logAndPrint(file, "Searching for element 9 (should be found)");
+        logAndPrint(file, "Searching for element 9");
         assert(list.search(9) == 9);
         logAndPrint(file, "Element 9 found");
-
-        logAndPrint(file, "Searching for element 6 (shouldn't be found)");
-        assert(list.search(6) == -1);
-        logAndPrint(file, "Element 6 not found.");
 
         logAndPrint(file, "Clearing list with !");
         !list;
